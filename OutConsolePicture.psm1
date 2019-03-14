@@ -7,14 +7,14 @@ function GetPixelText ($color) {
 function Out-ConsolePicture {
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory=$true, ParameterSetName="FromPath", Position=0)]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPath", Position = 0)]
         [ValidateNotNullOrEmpty()][string[]]
         $Path,
 
-        [Parameter(Mandatory=$true, ParameterSetName="FromWeb")]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromWeb")]
         [System.Uri[]]$Url,
 
-        [Parameter(Mandatory=$true, ParameterSetName="FromPipeline", ValueFromPipeline=$true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPipeline", ValueFromPipeline = $true)]
         [System.Drawing.Bitmap[]]$InputObject,
 
         [Parameter()]
@@ -27,8 +27,13 @@ function Out-ConsolePicture {
     begin {
         if ($PSCmdlet.ParameterSetName -eq "FromPath") {
             foreach ($file in $Path) {
-                $image = New-Object System.Drawing.Bitmap -ArgumentList "$(Resolve-Path $file)"
-                $InputObject += $image
+                try {
+                    $image = New-Object System.Drawing.Bitmap -ArgumentList "$(Resolve-Path $file)"
+                    $InputObject += $image
+                }
+                catch {
+                    Write-Error "An error occurred while loading image. Supported formats are BMP, GIF, EXIF, JPG, PNG and TIFF."
+                }
             }
         }
 
@@ -41,43 +46,45 @@ function Out-ConsolePicture {
         }
 
         if ($Host.Name -eq "Windows PowerShell ISE Host") {
-        # ISE neither supports ANSI, nor reports back a width for resizing.
-        Write-Warning "ISE does not support ANSI colors. Sorry! :("
-        Break
+            # ISE neither supports ANSI, nor reports back a width for resizing.
+            Write-Warning "ISE does not support ANSI colors. No images for you. Sorry! :("
+            Break
         }
     }
     
     process {
         $InputObject | ForEach-Object {
-            # Resize image to console width if needed
-            if ($_.Width -gt $host.UI.RawUI.WindowSize.Width -and -not $DoNotResize) {
-                $new_height = $_.Height / ($_.Width / $host.UI.RawUI.WindowSize.Width)
-                $new_width = $host.UI.RawUI.WindowSize.Width
-                $_ = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
-            }
-            $color_string = New-Object System.Text.StringBuilder
-            for ($y = 0; $y -lt $_.Height; $y++) {
-                if ($y % 2) {
-                    if (-not $NoAspectCorrection) {
-                        continue
+            if ($_ -is [System.Drawing.Bitmap]) {
+                # Resize image to console width if needed
+                if ($_.Width -gt $host.UI.RawUI.WindowSize.Width -and -not $DoNotResize) {
+                    $new_height = $_.Height / ($_.Width / $host.UI.RawUI.WindowSize.Width)
+                    $new_width = $host.UI.RawUI.WindowSize.Width
+                    $_ = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
+                }
+                $color_string = New-Object System.Text.StringBuilder
+                for ($y = 0; $y -lt $_.Height; $y++) {
+                    if ($y % 2) {
+                        if (-not $NoAspectCorrection) {
+                            continue
+                        }
+                    }
+                    else {
+                        [void]$color_string.append("`n")
+                    }
+                    for ($x = 0; $x -lt $_.Width; $x++) {
+                        $pixel = GetPixelText $_.GetPixel($x, $y)
+                        [void]$color_string.Append($pixel)
                     }
                 }
-                else {
-                    [void]$color_string.append("`n")
-                }
-                for ($x = 0;$x -lt $_.Width; $x++) {
-                    $pixel = GetPixelText $_.GetPixel($x, $y)
-                    [void]$color_string.Append($pixel)
-                }
+                $color_string.ToString()
+                $_.Dispose()
             }
-            $color_string.ToString()
-            $_.Dispose()
         }
     }
     
     end {
     }
-<#
+    <#
 .SYNOPSIS
     Renders an image to the console
 .DESCRIPTION
