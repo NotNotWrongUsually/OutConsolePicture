@@ -8,16 +8,28 @@ function Out-ConsolePicture {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "FromPath", Position = 0)]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPathNoResize")]
         [ValidateNotNullOrEmpty()][string[]]
         $Path,
-
+        
         [Parameter(Mandatory = $true, ParameterSetName = "FromWeb")]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromWebNoResize")]
         [System.Uri[]]$Url,
-
+        
         [Parameter(Mandatory = $true, ParameterSetName = "FromPipeline", ValueFromPipeline = $true)]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPipelineNoResize")]
         [System.Drawing.Bitmap[]]$InputObject,
+        
+        
+        [Parameter(ParameterSetName = "FromPath")]
+        [Parameter(ParameterSetName = "FromWeb")]
+        [Parameter(ParameterSetName = "FromPipeline")]
+        [ValidateNotNullOrEmpty()]
+        [int]$Width,
 
-        [Parameter()]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPathNoResize")]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromWebNoResize")]
+        [Parameter(Mandatory = $true, ParameterSetName = "FromPipelineNoResize")]
         [switch]$DoNotResize,
         
         [Parameter()]
@@ -56,9 +68,14 @@ function Out-ConsolePicture {
         $InputObject | ForEach-Object {
             if ($_ -is [System.Drawing.Bitmap]) {
                 # Resize image to console width if needed
-                if ($_.Width -gt $host.UI.RawUI.WindowSize.Width -and -not $DoNotResize) {
-                    $new_height = $_.Height / ($_.Width / $host.UI.RawUI.WindowSize.Width)
-                    $new_width = $host.UI.RawUI.WindowSize.Width
+                
+                if ($width -or ($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize) {
+                    if ($width) {
+                        $new_width = $width
+                    } else {
+                        $new_width = $host.UI.RawUI.WindowSize.Width
+                    }
+                    $new_height = $_.Height / ($_.Width / $new_width)
                     $resized_image = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
                     $_.Dispose()
                     $_ = $resized_image
