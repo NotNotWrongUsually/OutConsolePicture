@@ -66,6 +66,7 @@ function Out-ConsolePicture {
                 }
             }
             $color_string.ToString()
+            $_.Dispose()
         }
     }
     
