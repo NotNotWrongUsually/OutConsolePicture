@@ -116,3 +116,7 @@ OUTPUTS
 
 RELATED LINKS
 ```
+
+# License
+You can copy it, change it, or stick it in your hat;
+But never charge a penny for it - simple as that!
