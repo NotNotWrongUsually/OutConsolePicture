@@ -1,5 +1,13 @@
 # OutConsolePicture
 Powershell cmdlet for rendering image files to console
+
+# How to install?
+The module is published to the Powershell Gallery, so get it from there with `Install-Module -Name OutConsolePicture`
+
+# Documentation
+
+Straight from the module help:
+
 ```
 NAME
     Out-ConsolePicture
