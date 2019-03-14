@@ -59,7 +59,9 @@ function Out-ConsolePicture {
                 if ($_.Width -gt $host.UI.RawUI.WindowSize.Width -and -not $DoNotResize) {
                     $new_height = $_.Height / ($_.Width / $host.UI.RawUI.WindowSize.Width)
                     $new_width = $host.UI.RawUI.WindowSize.Width
-                    $_ = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
+                    $resized_image = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
+                    $_.Dispose()
+                    $_ = $resized_image
                 }
                 $color_string = New-Object System.Text.StringBuilder
                 for ($y = 0; $y -lt $_.Height; $y++) {
