@@ -43,8 +43,13 @@ function Out-ConsolePicture {
         if ($PSCmdlet.ParameterSetName -eq "FromWeb") {
             foreach ($uri in $Url) {
                 $data = (Invoke-WebRequest $uri).RawContentStream
-                $image = New-Object System.Drawing.Bitmap -ArgumentList $data
-                $InputObject += $image
+                try {
+                    $image = New-Object System.Drawing.Bitmap -ArgumentList $data
+                    $InputObject += $image
+                }
+                catch {
+                    Write-Error "An error occurred while loading image. Supported formats are BMP, GIF, EXIF, JPG, PNG and TIFF."
+                }
             }
         }
 
