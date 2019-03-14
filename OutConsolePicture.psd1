@@ -30,7 +30,7 @@ CompanyName = 'Unknown'
 Copyright = 'You can copy it, change it, or stick it in your hat; But never charge a penny for it - simple as that!'
 
 # Description of the functionality provided by this module
-# Description = ''
+Description = 'Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" using ANSI escape strings. The final result will be output in the shell. By default images will be reformatted to the size of the current shell, though this behaviour can be suppressed with the -DoNotResize switch.'
 
 # Minimum version of the Windows PowerShell engine required by this module
 # PowerShellVersion = ''
