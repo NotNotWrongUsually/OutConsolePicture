@@ -8,28 +8,19 @@ function Out-ConsolePicture {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory = $true, ParameterSetName = "FromPath", Position = 0)]
-        [Parameter(Mandatory = $true, ParameterSetName = "FromPathNoResize")]
         [ValidateNotNullOrEmpty()][string[]]
         $Path,
         
         [Parameter(Mandatory = $true, ParameterSetName = "FromWeb")]
-        [Parameter(Mandatory = $true, ParameterSetName = "FromWebNoResize")]
         [System.Uri[]]$Url,
         
         [Parameter(Mandatory = $true, ParameterSetName = "FromPipeline", ValueFromPipeline = $true)]
-        [Parameter(Mandatory = $true, ParameterSetName = "FromPipelineNoResize")]
         [System.Drawing.Bitmap[]]$InputObject,
         
-        
-        [Parameter(ParameterSetName = "FromPath")]
-        [Parameter(ParameterSetName = "FromWeb")]
-        [Parameter(ParameterSetName = "FromPipeline")]
-        [ValidateNotNullOrEmpty()]
+        [Parameter()]        
         [int]$Width,
 
-        [Parameter(Mandatory = $true, ParameterSetName = "FromPathNoResize")]
-        [Parameter(Mandatory = $true, ParameterSetName = "FromWebNoResize")]
-        [Parameter(Mandatory = $true, ParameterSetName = "FromPipelineNoResize")]
+        [Parameter()]
         [switch]$DoNotResize,
         
         [Parameter()]
@@ -67,9 +58,8 @@ function Out-ConsolePicture {
     process {
         $InputObject | ForEach-Object {
             if ($_ -is [System.Drawing.Bitmap]) {
-                # Resize image to console width if needed
-                
-                if ($width -or ($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize) {
+                # Resize image to console width or width parameter
+                if ($width -or (($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize)) {
                     if ($width) {
                         $new_width = $width
                     } else {
@@ -116,6 +106,8 @@ One or more Urls for the image(s) to be rendered to the console.
 A Bitmap object that will be rendered to the console.
 .PARAMETER DoNotResize
 By default, images will be resized to have their width match the current console width. Setting this switch disables that behaviour.
+.PARAMETER Width
+Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
 .PARAMETER NoAspectCorrection
 By default only every other line in the image will be rendered, due to most console fonts using an spect ratio of 1:2. Setting this switch causes the entire image to be rendered. Unless a font with an aspect ratio close to 1:1 is used this will look stretched.
 
