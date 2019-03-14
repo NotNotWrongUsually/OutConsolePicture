@@ -39,7 +39,12 @@ function Out-ConsolePicture {
                 $InputObject += $image
             }
         }
-        
+
+        if ($Host.Name -eq "Windows PowerShell ISE Host") {
+        # ISE neither supports ANSI, nor reports back a width for resizing.
+        Write-Warning "ISE does not support ANSI colors. Sorry! :("
+        Break
+        }
     }
     
     process {
