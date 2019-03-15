@@ -20,100 +20,22 @@ SYNOPSIS
 
 
 SYNTAX
-    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
+    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParam
+    eters>]
 
-    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
+    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>
+    ]
 
-    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-
-DESCRIPTION
-    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" using ANSI escape strings. The final result will be output in the shell. By default images will be reformatted to the size of the current shell, though this behaviour can be suppressed with the -DoNotResize switch. ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think there is anything I can do about that, so either use the -DoNotResize switch, or don't use ISE.
-
-
-PARAMETERS
-    -Path <String[]>
-        One or more paths to the image(s) to be rendered to the console.
-
-        Required?                    true
-        Position?                    1
-        Default value
-        Accept pipeline input?       false
-        Accept wildcard characters?  false
-
-    -Url <Uri[]>
-        One or more Urls for the image(s) to be rendered to the console.
-
-        Required?                    true
-        Position?                    named
-        Default value
-        Accept pipeline input?       false
-        Accept wildcard characters?  false
-
-    -InputObject <Bitmap[]>
-        A Bitmap object that will be rendered to the console.
-
-        Required?                    true
-        Position?                    named
-        Default value
-        Accept pipeline input?       true (ByValue)
-        Accept wildcard characters?  false
-
-PS D:\scripting\NotNotWrongUsually> get-help Out-ConsolePicture
-
-NAME
-    Out-ConsolePicture
-
-SYNOPSIS
-    Renders an image to the console
-
-
-SYNTAX
-    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
+    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<Common
+    Parameters>]
 
 
 DESCRIPTION
-    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" using ANSI escape strings. The final result will b
-    e output in the shell. By default images will be reformatted to the size of the current shell, though this behaviour can be suppressed with the -DoNotR
-    esize switch. ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think there is anything I can do about t
-    hat, so either use the -DoNotResize switch, or don't use ISE.
-
-
-RELATED LINKS
-
-REMARKS
-    To see the examples, type: "get-help Out-ConsolePicture -examples".
-    For more information, type: "get-help Out-ConsolePicture -detailed".
-    For technical information, type: "get-help Out-ConsolePicture -full".
-
-
-
-PS D:\scripting\NotNotWrongUsually> get-help Out-ConsolePicture -full
-
-NAME
-    Out-ConsolePicture
-
-SYNOPSIS
-    Renders an image to the console
-
-
-SYNTAX
-    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
-
-
-DESCRIPTION
-    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" using ANSI escape strings. The final result will b
-    e output in the shell. By default images will be reformatted to the size of the current shell, though this behaviour can be suppressed with the -DoNotR
-    esize switch. ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think there is anything I can do about t
-    hat, so either use the -DoNotResize switch, or don't use ISE.
+    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" usin
+    g ANSI escape strings. The final result will be output in the shell. By default images will be reformatte
+    d to the size of the current shell, though this behaviour can be suppressed with the -DoNotResize switch.
+     ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think t
+    here is anything I can do about that, so either use the -DoNotResize switch, or don't use ISE.
 
 
 PARAMETERS
@@ -154,7 +76,8 @@ PARAMETERS
         Accept wildcard characters?  false
 
     -DoNotResize [<SwitchParameter>]
-        By default, images will be resized to have their width match the current console width. Setting this switch disables that behaviour.
+        By default, images will be resized to have their width match the current console width. Setting this
+        switch disables that behaviour.
 
         Required?                    false
         Position?                    named
@@ -163,8 +86,9 @@ PARAMETERS
         Accept wildcard characters?  false
 
     -NoAspectCorrection [<SwitchParameter>]
-        By default only every other line in the image will be rendered, due to most console fonts using an spect ratio of 1:2. Setting this switch causes t
-        he entire image to be rendered. Unless a font with an aspect ratio close to 1:1 is used this will look stretched.
+        By default only every other line in the image will be rendered, due to most console fonts using an sp
+        ect ratio of 1:2. Setting this switch causes the entire image to be rendered. Unless a font with an a
+        spect ratio close to 1:1 is used this will look stretched.
 
         Required?                    false
         Position?                    named
