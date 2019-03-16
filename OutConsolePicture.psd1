@@ -101,13 +101,13 @@ PrivateData = @{
         # LicenseUri = ''
 
         # A URL to the main website for this project.
-        # ProjectUri = ''
+        ProjectUri = 'https://github.com/NotNotWrongUsually/OutConsolePicture'
 
         # A URL to an icon representing this module.
         # IconUri = ''
 
         # ReleaseNotes of this module
-        # ReleaseNotes = ''
+        ReleaseNotes = 'https://github.com/NotNotWrongUsually/OutConsolePicture/releases'
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
