@@ -5,7 +5,7 @@ Powershell cmdlet for rendering image files to console
 The module is published to the Powershell Gallery, so get it from there with `Install-Module -Name OutConsolePicture`
 
 # Result
-![Dandelion](https://i.imgur.com/P4Pg7Y0.png)
+![Dandelion](https://i.imgur.com/80gucpA.png)
 
 # Documentation
 
@@ -20,22 +20,19 @@ SYNOPSIS
 
 
 SYNTAX
-    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParam
-    eters>]
+    Out-ConsolePicture [-Path] <String[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
 
-    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>
-    ]
+    Out-ConsolePicture -Url <Uri[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
 
-    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<Common
-    Parameters>]
+    Out-ConsolePicture -InputObject <Bitmap[]> [-Width <Int32>] [-DoNotResize] [-NoAspectCorrection] [<CommonParameters>]
 
 
 DESCRIPTION
-    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" usin
-    g ANSI escape strings. The final result will be output in the shell. By default images will be reformatte
-    d to the size of the current shell, though this behaviour can be suppressed with the -DoNotResize switch.
-     ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think t
-    here is anything I can do about that, so either use the -DoNotResize switch, or don't use ISE.
+    Out-ConsolePicture will take an image file and convert it to a text string. Colors will be "encoded" using
+    ANSI escape strings. The final result will be output in the shell. By default images will be reformatted
+    to the size of the current shell, though this behaviour can be suppressed with the -DoNotResize switch.
+    ISE users, take note: ISE does not report a window width, and scaling fails as a result. I don't think
+    there is anything I can do about that, so either use the -DoNotResize switch, or don't use ISE.
 
 
 PARAMETERS
@@ -78,17 +75,6 @@ PARAMETERS
     -DoNotResize [<SwitchParameter>]
         By default, images will be resized to have their width match the current console width. Setting this
         switch disables that behaviour.
-
-        Required?                    false
-        Position?                    named
-        Default value                False
-        Accept pipeline input?       false
-        Accept wildcard characters?  false
-
-    -NoAspectCorrection [<SwitchParameter>]
-        By default only every other line in the image will be rendered, due to most console fonts using an sp
-        ect ratio of 1:2. Setting this switch causes the entire image to be rendered. Unless a font with an a
-        spect ratio close to 1:1 is used this will look stretched.
 
         Required?                    false
         Position?                    named
