@@ -1,7 +1,7 @@
 Add-Type -Assembly 'System.Drawing'
 
-function GetPixelText ($color) {
-    "$([char]27)[48;2;{0};{1};{2}m" -f $color.r, $color.g, $color.b + " " + "$([char]27)[0m"
+function GetPixelText ($color_fg, $color_bg) {
+    "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
 }
 
 function Out-ConsolePicture {
@@ -21,10 +21,7 @@ function Out-ConsolePicture {
         [int]$Width,
 
         [Parameter()]
-        [switch]$DoNotResize,
-        
-        [Parameter()]
-        [switch]$NoAspectCorrection
+        [switch]$DoNotResize
     )
     
     begin {
@@ -78,16 +75,23 @@ function Out-ConsolePicture {
                 $color_string = New-Object System.Text.StringBuilder
                 for ($y = 0; $y -lt $_.Height; $y++) {
                     if ($y % 2) {
-                        if (-not $NoAspectCorrection) {
                             continue
-                        }
                     }
                     else {
                         [void]$color_string.append("`n")
                     }
                     for ($x = 0; $x -lt $_.Width; $x++) {
-                        $pixel = GetPixelText $_.GetPixel($x, $y)
-                        [void]$color_string.Append($pixel)
+                        if (($y + 2) -gt $_.Height) {
+                            # We are now on the last row. The bottom half of it in images with uneven pixel height
+                            # should just be coloured like the background of the console.
+                            $console_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
+                            $pixel = GetPixelText $_.GetPixel($x, $y) $console_bg
+                            [void]$color_string.Append($pixel)
+                        }
+                        else {
+                            $pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
+                            [void]$color_string.Append($pixel)
+                        }
                     }
                 }
                 $color_string.ToString()
@@ -113,8 +117,6 @@ A Bitmap object that will be rendered to the console.
 By default, images will be resized to have their width match the current console width. Setting this switch disables that behaviour.
 .PARAMETER Width
 Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
-.PARAMETER NoAspectCorrection
-By default only every other line in the image will be rendered, due to most console fonts using an spect ratio of 1:2. Setting this switch causes the entire image to be rendered. Unless a font with an aspect ratio close to 1:1 is used this will look stretched.
 
 .EXAMPLE
     Out-ConsolePicture ".\someimage.jpg"
