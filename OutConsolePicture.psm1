@@ -80,16 +80,22 @@ function Out-ConsolePicture {
                     else {
                         [void]$color_string.append("`n")
                     }
+                    # If https://github.com/PowerShell/PowerShell/issues/8482 ever gets fixed, the below should return
+                    # to calling the GetPixelText function, like God intended.
                     for ($x = 0; $x -lt $_.Width; $x++) {
                         if (($y + 2) -gt $_.Height) {
                             # We are now on the last row. The bottom half of it in images with uneven pixel height
                             # should just be coloured like the background of the console.
-                            $console_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
-                            $pixel = GetPixelText $_.GetPixel($x, $y) $console_bg
+                            $color_fg = $_.GetPixel($x, $y)
+                            $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
+                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
                             [void]$color_string.Append($pixel)
                         }
                         else {
-                            $pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
+                            #$pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
+                            $color_fg = $_.GetPixel($x, $y)
+                            $color_bg = $_.GetPixel($x, $y + 1)
+                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
                             [void]$color_string.Append($pixel)
                         }
                     }

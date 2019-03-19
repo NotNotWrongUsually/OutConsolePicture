@@ -95,7 +95,7 @@ PrivateData = @{
     PSData = @{
 
         # Tags applied to this module. These help with module discovery in online galleries.
-        Tags = 'Picture','Image','Console','ANSI'
+        Tags = 'Picture','Image','Console','ANSI', 'Graphics'
 
         # A URL to the license for this module.
         # LicenseUri = ''
