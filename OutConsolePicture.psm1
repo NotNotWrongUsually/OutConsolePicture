@@ -39,7 +39,19 @@ function Out-ConsolePicture {
 
         if ($PSCmdlet.ParameterSetName -eq "FromWeb") {
             foreach ($uri in $Url) {
-                $data = (Invoke-WebRequest $uri).RawContentStream
+                try {
+                    $data = (Invoke-WebRequest $uri).RawContentStream    
+                }
+                catch [Microsoft.PowerShell.Commands.HttpResponseException] {
+                    if ($_.Exception.Response.statuscode.value__ -eq 302) {
+                        $actual_location = $_.Exception.Response.Headers.Location.AbsoluteUri
+                        $data = (Invoke-WebRequest $actual_location).RawContentStream    
+                    }
+                    else {
+                        throw $_
+                    }                 
+                }
+                
                 try {
                     $image = New-Object System.Drawing.Bitmap -ArgumentList $data
                     $InputObject += $image
@@ -64,7 +76,8 @@ function Out-ConsolePicture {
                 if ($width -or (($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize)) {
                     if ($width) {
                         $new_width = $width
-                    } else {
+                    }
+                    else {
                         $new_width = $host.UI.RawUI.WindowSize.Width
                     }
                     $new_height = $_.Height / ($_.Width / $new_width)
@@ -75,7 +88,7 @@ function Out-ConsolePicture {
                 $color_string = New-Object System.Text.StringBuilder
                 for ($y = 0; $y -lt $_.Height; $y++) {
                     if ($y % 2) {
-                            continue
+                        continue
                     }
                     else {
                         [void]$color_string.append("`n")
