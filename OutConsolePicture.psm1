@@ -24,7 +24,11 @@ function Out-ConsolePicture {
         [switch]$DoNotResize,
 
         [Parameter()]
-        [int]$AlphaThreshold = 0
+        [int]$AlphaThreshold = 0,
+
+        [Parameter()]
+        [ValidateSet("Left","Center","Right")]
+        [string]$Align = "Left"
     )
     
     begin {
@@ -75,6 +79,7 @@ function Out-ConsolePicture {
     }
     
     process {
+        $line_break_char = "`n"
         $InputObject | ForEach-Object {
             if ($_ -is [System.Drawing.Bitmap]) {
                 # Resize image to console width or width parameter
@@ -96,23 +101,19 @@ function Out-ConsolePicture {
                         continue
                     }
                     else {
-                        [void]$color_string.append("`n")
+                        [void]$color_string.append($line_break_char)
                     }
                     # If https://github.com/PowerShell/PowerShell/issues/8482 ever gets fixed, the below should return
                     # to calling the GetPixelText function, like God intended.
                     for ($x = 0; $x -lt $_.Width; $x++) {
                         if (($y + 2) -gt $_.Height) {
                             # We are now on the last row. The bottom half of it in images with uneven pixel height
-                            # should just be coloured like the background of the console.
-                            $color_fg = $_.GetPixel($x, $y)
-                            $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
-                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
+                            $pixel = " "
                         }
                         else {
                             #$pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
                             $color_fg = $_.GetPixel($x, $y)
                             if($color_fg.A -lt $AlphaLevelConsideredTransparent){
-                                $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
                                 $pixel = " "
                             }
                             else{
@@ -124,7 +125,34 @@ function Out-ConsolePicture {
                         [void]$color_string.Append($pixel)
                     }
                 }
-                $color_string.ToString()
+
+                # Write the colors to the console
+
+                switch ($Align) {
+                    "Left" {
+                        # Left is the default
+                        $color_string.ToString()
+                    }
+                    "Right" {
+                        # Add spaces each line to push to right of buffer
+                        $screen_width = $Host.UI.RawUI.BufferSize.Width;
+                        $image_width = $new_width;
+                        $padding = $screen_width - $image_width;
+                        $color_string.ToString().Split($line_break_char) | % {
+                            Write-Host (" "*$padding + $_)
+                        }
+                    }
+                    "Center" {
+                        # Add spaces each line to push to center of buffer
+                        $screen_width = $Host.UI.RawUI.BufferSize.Width / 2;
+                        $image_width = $new_width / 2;
+                        $padding = $screen_width - $image_width + 1;
+                        $color_string.ToString().Split($line_break_char) | % {
+                            Write-Host (" "*$padding + $_)
+                        }
+                    }
+                }
+
                 $_.Dispose()
             }
         }
@@ -147,6 +175,10 @@ A Bitmap object that will be rendered to the console.
 By default, images will be resized to have their width match the current console width. Setting this switch disables that behaviour.
 .PARAMETER Width
 Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
+.PARAMETER AlphaThreshold
+Default 0; Pixels with an alpha value less than this are rendered as fully transparent. Fully opaque = 255. Start raising above 0 to turn more pixels fully transparent.
+.PARAMETER Align
+Default 'Left'; Align image to the Left, Right, or Center of the terminal.
 
 .EXAMPLE
     Out-ConsolePicture ".\someimage.jpg"
