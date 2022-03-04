@@ -21,7 +21,10 @@ function Out-ConsolePicture {
         [int]$Width,
 
         [Parameter()]
-        [switch]$DoNotResize
+        [switch]$DoNotResize,
+
+        [Parameter()]
+        [int]$AlphaThreshold = 0
     )
     
     begin {
@@ -67,6 +70,8 @@ function Out-ConsolePicture {
             Write-Warning "ISE does not support ANSI colors. No images for you. Sorry! :("
             Break
         }
+
+        $AlphaLevelConsideredTransparent = $AlphaThreshold
     }
     
     process {
@@ -102,15 +107,21 @@ function Out-ConsolePicture {
                             $color_fg = $_.GetPixel($x, $y)
                             $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
                             $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
-                            [void]$color_string.Append($pixel)
                         }
                         else {
                             #$pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
                             $color_fg = $_.GetPixel($x, $y)
-                            $color_bg = $_.GetPixel($x, $y + 1)
-                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
-                            [void]$color_string.Append($pixel)
+                            if($color_fg.A -lt $AlphaLevelConsideredTransparent){
+                                $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
+                                $pixel = " "
+                            }
+                            else{
+                                $color_bg = $_.GetPixel($x, $y + 1)
+                                $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
+                            }
                         }
+
+                        [void]$color_string.Append($pixel)
                     }
                 }
                 $color_string.ToString()
