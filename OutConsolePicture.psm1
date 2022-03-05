@@ -81,26 +81,31 @@ function Out-ConsolePicture {
 	process {
 		# Character used to cause a line break
 		$line_break_char = "`n"
-		
+
 		# For each image
 		$InputObject | ForEach-Object {
 			
 			# If it's a recognized bitmap
 			if ($_ -is [System.Drawing.Bitmap]) {
 				
-				# Resize image to console width or width parameter
-				if ($width -or (($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize)) {
-					if ($width) {
-						$new_width = $width
+				# Resize image if explicitly told not to
+				if (-not $DoNotResize) {
+
+                    # If we're not given a width, or it's too large set to full width
+                    if(-not $width -or ($width -gt $Host.UI.RawUI.BufferSize.Width)){
+                        $width = $Host.UI.RawUI.BufferSize.Width;
 					}
-					else {
-						$new_width = $host.UI.RawUI.WindowSize.Width
-					}
-					$new_height = $_.Height / ($_.Width / $new_width)
-					$resized_image = New-Object System.Drawing.Bitmap -ArgumentList $_, $new_width, $new_height
+
+                    # Perform ratio-safe resize
+					$new_height = $_.Height / ($_.Width / $width)
+					$resized_image = New-Object System.Drawing.Bitmap -ArgumentList $_, $width, $new_height
 					$_.Dispose()
 					$_ = $resized_image
 				}
+                else {
+                    # If we can't resize, at least clip the image at the buffer width so we don't overflow it
+                    $width = $Host.UI.RawUI.BufferSize.Width;
+                }
 				
 				$color_string = New-Object System.Text.StringBuilder
 				
@@ -118,7 +123,7 @@ function Out-ConsolePicture {
 					}
 					
 					# For each pixel (and its corresponding pixel below)
-					for ($x = 0; $x -lt $_.Width; $x++) {
+					for ($x = 0; $x -lt [math]::Min($_.Width, $width); $x++) {
 						
 						# Reset variables
 						$fg_transparent, $bg_transparent = $false, $false
@@ -204,23 +209,20 @@ function Out-ConsolePicture {
 				}
 				else{
 					# Right and Center require padding be added to each line
+                    $screen_width = $Host.UI.RawUI.BufferSize.Width;
 
 					if($Align -eq "Right"){
 						# Add spaces each line to push to right of buffer
-						$screen_width = $Host.UI.RawUI.BufferSize.Width;
-						$image_width = $new_width;
-						$padding = $screen_width - $image_width;
+						$padding = $screen_width - $width;
 					}
 					if($Align -eq "Center"){
 						# Add spaces each line to push to center of buffer
-						$screen_width = [math]::ceiling($Host.UI.RawUI.BufferSize.Width / 2);
-						$image_width = [math]::ceiling($new_width / 2);
-						$padding = $screen_width - $image_width;
+						$padding = [math]::ceiling($screen_width / 2) - [math]::ceiling($width / 2);
 					}
 
 					# Print each line with required padding
-					$color_string.ToString().Split($line_break_char) | % {
-						Write-Host (" "*$padding + $_)
+					$color_string.ToString().Split($line_break_char) |% {
+						Write-Host (" "*$padding+$_)
 					}
 				}
 
