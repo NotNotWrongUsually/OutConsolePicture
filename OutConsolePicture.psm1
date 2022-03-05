@@ -220,7 +220,7 @@ function Out-ConsolePicture {
 
 					# Print each line with required padding
 					$color_string.ToString().Split($line_break_char) | % {
-						Write-Host (" "*$padding)$_
+						Write-Host (" "*$padding + $_)
 					}
 				}
 
