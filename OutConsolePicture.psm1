@@ -70,6 +70,12 @@ function Out-ConsolePicture {
             Write-Warning "ISE does not support ANSI colors. No images for you. Sorry! :("
             Break
         }
+		
+		# Ignore Align if Width is not set
+		if(-not $PSBoundParameters.ContainsKey('Width') -and ($Align -ne "Left")){
+			$Align = "Left"
+		}
+
     }
     
     process {
@@ -242,7 +248,7 @@ Renders the image at this specific width. Use of the width parameter overrides D
 .PARAMETER AlphaThreshold
 Default 255; Pixels with an alpha (opacity) value less than this are rendered as fully transparent. Fully opaque = 255. Lowering the value will require a pixel to be more transparent to vanish, and will therefor include more pixels.
 .PARAMETER Align
-Default 'Left'; Align image to the Left, Right, or Center of the terminal.
+Default 'Left'; Align image to the Left, Right, or Center of the terminal. Must be used in conjuction with the Width parameter.
 
 .EXAMPLE
     Out-ConsolePicture ".\someimage.jpg"
