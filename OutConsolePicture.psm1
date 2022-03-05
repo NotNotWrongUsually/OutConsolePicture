@@ -1,9 +1,5 @@
 Add-Type -Assembly 'System.Drawing'
 
-function GetPixelText ($color_fg, $color_bg) {
-    "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
-}
-
 function Out-ConsolePicture {
     [CmdletBinding()]
     param (
@@ -95,39 +91,101 @@ function Out-ConsolePicture {
                     $_.Dispose()
                     $_ = $resized_image
                 }
+				
+				
                 $color_string = New-Object System.Text.StringBuilder
+				
+				# For each row of pixels in image
                 for ($y = 0; $y -lt $_.Height; $y++) {
                     if ($y % 2) {
+						# Skip over even rows because we process them in paids on odds only
                         continue
                     }
                     else {
-                        [void]$color_string.append($line_break_char)
+						if($y -gt 0) {
+							# Add linebreaks after every row, if we're not on the first row
+							[void]$color_string.append($line_break_char)
+						}
                     }
-                    # If https://github.com/PowerShell/PowerShell/issues/8482 ever gets fixed, the below should return
-                    # to calling the GetPixelText function, like God intended.
+					
+					# For each specific pixel in this row
                     for ($x = 0; $x -lt $_.Width; $x++) {
+						$fg_transparent, $bg_transparent = $false, $false
+						$color_bg, $color_fg = $null, $null
+						
+						# Determine foreground color
+						$color_fg = $_.GetPixel($x, $y)
+						if($color_fg.A -lt $AlphaLevelConsideredTransparent){
+							$fg_transparent = $true;
+						}
+						
+						# Check if there's even a background color below to determine
                         if (($y + 2) -gt $_.Height) {
-                            # We are now on the last row. The bottom half of it in images with uneven pixel height
-                            $pixel = " "
-                        }
-                        else {
-                            #$pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
-                            $color_fg = $_.GetPixel($x, $y)
-                            if($color_fg.A -lt $AlphaLevelConsideredTransparent){
-                                $pixel = " "
+							# We are on the last row. 
+                            # There is no pixel below, and so treat the background as transparent
+							$bg_transparent = $true;
+						}
+						else{
+							# There is a pixel below
+							# Determine background color
+							$color_bg = $_.GetPixel($x, $y + 1)
+							if($color_bg.A -lt $AlphaLevelConsideredTransparent){
+								$bg_transparent = $true;
                             }
-                            else{
-                                $color_bg = $_.GetPixel($x, $y + 1)
-                                $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
-                            }
-                        }
+						}
+						
+						# If both are transparent, just use an empty space as a fully "transparent" pixel pair
+						if($fg_transparent -and $bg_transparent){
+							$pixel = " ";
+						}
+						# Otherwse determine which to render and which to not render
+						else{
+							$pixel = "";
+							
+							$top_half_char = [char]9600;
+							$bottom_half_char = [char]9604;
+							
+							# Use the top character as the foreground by default
+							$character_to_use = $top_half_char;
+							
+							# If our top character is transparent but bottom isnt, we can't render a fg transparent. 
+							# We need to flip the logic, sop
+							if($fg_transparent -and -not $bg_transparent){
+								# So use the bottom-half char to render instead
+								$character_to_use = $bottom_half_char;
+								
+								# Invert the colors
+								$color_fg = $color_bg
+								
+								# Invert the known transparent states
+								$fg_transparent = $false
+								$bg_transparent = $true
+							}
+							
+							# If the fg (top pixel) is not transparent, give it a character with color
+							if(-not $fg_transparent){
+								# Drag a foreground
+								$pixel += "$([char]27)[38;2;{0};{1};{2}m" -f $color_fg.r, $color_fg.g, $color_fg.b
+							}
+							# If the bg (bottom pixel) is not transparent, give it a character with color
+							if(-not $bg_transparent){
+								# Drag a foreground
+								$pixel += "$([char]27)[48;2;{0};{1};{2}m" -f $color_bg.r, $color_bg.g, $color_bg.b
+							}
+							
+							# Add the actual character to render
+							$pixel += $character_to_use
+							
+							# Reset the style to prepare for the next pixel
+							$pixel += "$([char]27)[0m"
+						}                            
 
+						# Add the pixel-pair to the array
                         [void]$color_string.Append($pixel)
                     }
                 }
 
-                # Write the colors to the console
-
+                # Write the colors to the console based on alignment
                 switch ($Align) {
                     "Left" {
                         # Left is the default
