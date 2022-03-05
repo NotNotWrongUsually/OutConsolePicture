@@ -20,7 +20,7 @@ function Out-ConsolePicture {
         [switch]$DoNotResize,
 
         [Parameter()]
-        [int]$AlphaThreshold = 0,
+        [int]$AlphaThreshold = 255,
 
         [Parameter()]
         [ValidateSet("Left","Center","Right")]
@@ -240,7 +240,7 @@ By default, images will be resized to have their width match the current console
 .PARAMETER Width
 Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
 .PARAMETER AlphaThreshold
-Default 0; Pixels with an alpha value less than this are rendered as fully transparent. Fully opaque = 255. Start raising above 0 to turn more pixels fully transparent.
+Default 255; Pixels with an alpha (opacity) value less than this are rendered as fully transparent. Fully opaque = 255. Lowering the value will require a pixel to be more transparent to vanish, and will therefor include more pixels.
 .PARAMETER Align
 Default 'Left'; Align image to the Left, Right, or Center of the terminal.
 
@@ -263,4 +263,3 @@ Default 'Left'; Align image to the Left, Right, or Center of the terminal.
     Gloriously coloured console output
 #>
 }
-
