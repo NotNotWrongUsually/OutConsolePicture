@@ -21,6 +21,10 @@ function Out-ConsolePicture {
         [int]$Width,
 
         [Parameter()]
+        [ValidateSet("Left", "Center", "Right")]
+        [string]$HorizontalPosition,
+
+        [Parameter()]
         [switch]$DoNotResize
     )
     
@@ -85,18 +89,36 @@ function Out-ConsolePicture {
                     $_.Dispose()
                     $_ = $resized_image
                 }
+
+                # Extracting for performance purposes, so we don't have to access properties in a heavy loop later
+                $img_width = $_.Width
+                $img_height = $_.Height
+
+                # Figure out where to place the image if positioning was specified
+                if ($HorizontalPosition) {
+                    switch ($HorizontalPosition) {
+                        "Left" { $pos_x = 0 }
+                        "Center" { $pos_x = [Math]::Floor(($host.UI.RawUI.WindowSize.Width - $img_width) / 2) }
+                        "Right" { $pos_x = $host.UI.RawUI.WindowSize.Width - $img_width }
+                    }       
+                }
+                else {
+                    $pos_x = 0
+                }
+
                 $color_string = New-Object System.Text.StringBuilder
-                for ($y = 0; $y -lt $_.Height; $y++) {
+
+                for ($y = 0; $y -lt $img_height; $y++) {
                     if ($y % 2) {
                         continue
                     }
                     else {
-                        [void]$color_string.append("`n")
+                        [void]$color_string.append("`n`e[$($pos_x)G")
                     }
                     # If https://github.com/PowerShell/PowerShell/issues/8482 ever gets fixed, the below should return
                     # to calling the GetPixelText function, like God intended.
-                    for ($x = 0; $x -lt $_.Width; $x++) {
-                        if (($y + 2) -gt $_.Height) {
+                    for ($x = 0; $x -lt $img_width; $x++) {
+                        if (($y + 2) -gt $img_height) {
                             # We are now on the last row. The bottom half of it in images with uneven pixel height
                             # should just be coloured like the background of the console.
                             $color_fg = $_.GetPixel($x, $y)
