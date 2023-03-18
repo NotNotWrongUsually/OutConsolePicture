@@ -158,6 +158,8 @@ A Bitmap object that will be rendered to the console.
 By default, images will be resized to have their width match the current console width. Setting this switch disables that behaviour.
 .PARAMETER Width
 Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
+.PARAMETER HorizontalPosition
+Takes the values "Left", "Center", or "Right" and renders the image in that position.
 
 .EXAMPLE
     Out-ConsolePicture ".\someimage.jpg"
