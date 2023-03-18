@@ -1,7 +1,7 @@
 Add-Type -Assembly 'System.Drawing'
 
 function GetPixelText ($color_fg, $color_bg) {
-    "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
+    "`e[38;2;{0};{1};{2}m`e[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "`e[0m"
 }
 
 function Out-ConsolePicture {
@@ -101,14 +101,14 @@ function Out-ConsolePicture {
                             # should just be coloured like the background of the console.
                             $color_fg = $_.GetPixel($x, $y)
                             $color_bg = [System.Drawing.Color]::FromName($Host.UI.RawUI.BackgroundColor)
-                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
+                            $pixel = "`e[38;2;{0};{1};{2}m`e[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "`e[0m"
                             [void]$color_string.Append($pixel)
                         }
                         else {
                             #$pixel = GetPixelText $_.GetPixel($x, $y) $_.GetPixel($x, $y + 1)
                             $color_fg = $_.GetPixel($x, $y)
                             $color_bg = $_.GetPixel($x, $y + 1)
-                            $pixel = "$([char]27)[38;2;{0};{1};{2}m$([char]27)[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "$([char]27)[0m"
+                            $pixel = "`e[38;2;{0};{1};{2}m`e[48;2;{3};{4};{5}m" -f $color_fg.r, $color_fg.g, $color_fg.b, $color_bg.r, $color_bg.g, $color_bg.b + [char]9600 + "`e[0m"
                             [void]$color_string.Append($pixel)
                         }
                     }
