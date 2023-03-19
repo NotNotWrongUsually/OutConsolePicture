@@ -89,7 +89,7 @@ function Out-ConsolePicture {
                         # Default to using "One Half Dark" background
                         $transparency_color = [System.Drawing.Color]::FromArgb(40, 44, 52)
                     }
-                    # Create a balnk bitmap, same size as our image. Colour it with the desired alpha colour
+                    # Create a blank bitmap, same size as our image. Colour it with the desired alpha colour
                     # and then draw our image on top of it. Pass along the modified image.
                     $base = New-Object System.Drawing.Bitmap -ArgumentList $_.Width, $_.Height
                     $gfx_object = [System.Drawing.Graphics]::FromImage($base)
