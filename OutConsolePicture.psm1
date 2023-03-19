@@ -21,6 +21,9 @@ function Out-ConsolePicture {
         [int]$Width,
 
         [Parameter()]
+        [System.Drawing.Color]$TransparencyColor,
+
+        [Parameter()]
         [ValidateSet("Left", "Center", "Right")]
         [string]$HorizontalPosition,
 
@@ -76,6 +79,23 @@ function Out-ConsolePicture {
     process {
         $InputObject | ForEach-Object {
             if ($_ -is [System.Drawing.Bitmap]) {
+                
+                # Do alpha blending if the image supports it
+                if ([System.Drawing.Image]::IsAlphaPixelFormat($_.pixelformat)) {
+                    # Respect the transparency color if manually set
+                    if ($TransparencyColor) {
+                        $transparency_color = $TransparencyColor
+                    } else {
+                        # Default to using "One Half Dark" background
+                        $transparency_color = [System.Drawing.Color]::FromArgb(40, 44, 52)
+                    }
+                    $base = New-Object System.Drawing.Bitmap -ArgumentList $_.Width, $_.Height
+                    $gfx_object = [System.Drawing.Graphics]::FromImage($base)
+                    $gfx_object.Clear($transparency_color)
+                    $gfx_object.DrawImage($_, 0, 0)
+                    $_ = $base
+                }
+
                 # Resize image to console width or width parameter
                 if ($width -or (($_.Width -gt $host.UI.RawUI.WindowSize.Width) -and -not $DoNotResize)) {
                     if ($width) {
@@ -95,16 +115,12 @@ function Out-ConsolePicture {
                 $img_height = $_.Height
 
                 # Figure out where to place the image if positioning was specified
-                if ($HorizontalPosition) {
-                    switch ($HorizontalPosition) {
-                        "Left" { $pos_x = 0 }
-                        "Center" { $pos_x = [Math]::Floor(($host.UI.RawUI.WindowSize.Width - $img_width) / 2) }
-                        "Right" { $pos_x = $host.UI.RawUI.WindowSize.Width - $img_width }
-                    }       
-                }
-                else {
-                    $pos_x = 0
-                }
+                switch ($HorizontalPosition) {
+                    "Left" { $pos_x = 0 }
+                    "Center" { $pos_x = [Math]::Floor(($host.UI.RawUI.WindowSize.Width - $img_width) / 2) }
+                    "Right" { $pos_x = $host.UI.RawUI.WindowSize.Width - $img_width }
+                    Default { $pos_x = 0 }
+                }       
 
                 $color_string = New-Object System.Text.StringBuilder
 
@@ -160,6 +176,8 @@ By default, images will be resized to have their width match the current console
 Renders the image at this specific width. Use of the width parameter overrides DoNotResize.
 .PARAMETER HorizontalPosition
 Takes the values "Left", "Center", or "Right" and renders the image in that position.
+.PARAMETER TransparencyColor
+If the image is transparent this is the color that will be used for transparency. The parameter needs a color object. Check examples for how to set it. This should be the same color as your console background usually.
 
 .EXAMPLE
     Out-ConsolePicture ".\someimage.jpg"
@@ -173,6 +191,10 @@ Takes the values "Left", "Center", or "Right" and renders the image in that posi
     $image = New-Object System.Drawing.Bitmap -ArgumentList "C:\myimages\image.png"
     $image | Out-ConsolePicture
     Creates a new Bitmap object from a file on disk renders it to the console
+
+.EXAMPLE
+    Out-ConsolePicture ".\someimage.jpg" -TransparencyColor ([System.Drawing.Color]::FromArgb(40, 44, 52))
+    Renders a transparent image using the specified color for transparency.
 
 .INPUTS
     One or more System.Drawing.Bitmap objects
